@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.utils import get_custom_objects
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Define SEBlock class
 class SEBlock(tf.keras.layers.Layer):
@@ -73,6 +74,11 @@ loaded_model = tf.keras.models.load_model('model.h5')
 
 # Flask app setup
 app = Flask(__name__)
+CORS(app, resources={
+    r"/predict": {"origins": "*"},
+    r"/": {"origins": "*"},
+    r"/about": {"origins": "*"}
+})
 
 @app.route('/predict', methods=['POST'])
 def predict():
