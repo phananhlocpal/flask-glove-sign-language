@@ -1,8 +1,11 @@
-from flask import Flask, request, jsonify
 import tensorflow as tf
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import joblib
+from flask import Flask, request, jsonify
+
+# Configure TensorFlow to use only the CPU
+tf.config.set_visible_devices([], 'GPU')
 
 app = Flask(__name__)
 
@@ -31,7 +34,7 @@ class ModelService:
         features_scaled = self.scaler.transform(features)
         
         return features_scaled
-            
+             
     def predict(self, features: np.ndarray) -> dict:
         """Make prediction using loaded model"""
         predictions = self.model.predict(features)
@@ -89,6 +92,3 @@ def predict():
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({'message': 'Welcome to the model server!'})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=False)
