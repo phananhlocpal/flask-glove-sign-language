@@ -43,13 +43,13 @@ class ModelService:
         return {
             'predicted_label': int(predicted_class)
         }
+    
 
-# Initialize model service
-model_service = ModelService()
+@app.route('/predict', methods=['POST'])
+def predict():
+    # Initialize model service
+    model_service = ModelService()
 
-@app.before_first_request
-def initialize_model():
-    """Initialize model and scaler before first request"""
     try:
         # Update these paths to your model and scaler locations
         model_service.load_model(
@@ -60,8 +60,6 @@ def initialize_model():
         print(f"Error initializing model service: {str(e)}")
         raise
 
-@app.route('/predict', methods=['POST'])
-def predict():
     """Prediction endpoint"""
     try:
         # Get input data from request
