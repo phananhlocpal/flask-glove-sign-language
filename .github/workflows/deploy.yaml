@@ -13,7 +13,7 @@ on:
   workflow_call:
     secrets:
       KOYEB_EXAMPLES_APPS_TOKEN:
-        required: true
+        required: false
     inputs:
       git-url:
         description: "The repository to build"
