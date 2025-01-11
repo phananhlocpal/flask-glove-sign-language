@@ -43,17 +43,15 @@ class ModelService:
 
 model_service = ModelService()
 
-@app.before_first_request
-def initialize_model():
-    try:
-        # Update these paths to your model and scaler locations
-        model_service.load_model(
-            model_path='best_model.keras',
-            scaler_path='scaler.joblib'
-        )
-    except Exception as e:
-        print(f"Error initializing model service: {str(e)}")
-        raise
+try:
+    # Update these paths to your model and scaler locations
+    model_service.load_model(
+        model_path='best_model.keras',
+        scaler_path='scaler.joblib'
+    )
+except Exception as e:
+    print(f"Error initializing model service: {str(e)}")
+    raise
 
 @app.route('/predict', methods=['POST'])
 def predict():
