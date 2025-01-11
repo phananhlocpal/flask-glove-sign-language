@@ -1,47 +1,44 @@
 from flask import Flask, request, jsonify
 import tensorflow as tf
 import numpy as np
-from typing import Dict, Any
-import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import joblib
 
 app = Flask(__name__)
 
 class ModelService:
     def __init__(self):
         self.model = None
+        self.scaler = None
         
-    def load_model(self, model_path: str) -> None:
-        """Load the trained model"""
+    def load_model(self, model_path: str, scaler_path: str) -> None:
+        """Load the trained model and scaler"""
         try:
             self.model = tf.keras.models.load_model(model_path)
-            print("Model loaded successfully")
+            self.scaler = joblib.load(scaler_path)
+            print("Model and scaler loaded successfully")
         except Exception as e:
-            print(f"Error loading model: {str(e)}")
+            print(f"Error loading model or scaler: {str(e)}")
             raise
             
-    def predict(self, features: np.ndarray) -> Dict[str, Any]:
+    def prepare_features(self, tilt: list, accel: list) -> np.ndarray:
+        """Combine and preprocess tilt and accel data"""
+        # Combine features in the same order as training
+        features = np.concatenate([tilt, accel])
+        features = features.reshape(1, -1)  # Reshape to 2D array for scaler
+        
+        # Apply the same scaling as during training
+        features_scaled = self.scaler.transform(features)
+        
+        return features_scaled
+            
+    def predict(self, features: np.ndarray) -> dict:
         """Make prediction using loaded model"""
-        # Get model predictions
         predictions = self.model.predict(features)
-        
-        # Get predicted class and probability
         predicted_class = np.argmax(predictions[0])
-        confidence = float(predictions[0][predicted_class])
-        
-        # Get top 3 predictions with their probabilities
-        top_3_idx = np.argsort(predictions[0])[-3:][::-1]
-        top_3_predictions = [
-            {
-                'label': int(idx),
-                'probability': float(predictions[0][idx])
-            }
-            for idx in top_3_idx
-        ]
         
         return {
-            'predicted_label': int(predicted_class),
-            'confidence': confidence,
-            'top_3_predictions': top_3_predictions
+            'predicted_label': int(predicted_class)
         }
 
 # Initialize model service
@@ -49,21 +46,16 @@ model_service = ModelService()
 
 @app.before_first_request
 def initialize_model():
-    """Initialize model before first request"""
+    """Initialize model and scaler before first request"""
     try:
-        # Update this path to your model location
-        model_service.load_model('best_model.keras')
+        # Update these paths to your model and scaler locations
+        model_service.load_model(
+            model_path='best_model.keras',
+            scaler_path='scaler.joblib'
+        )
     except Exception as e:
         print(f"Error initializing model service: {str(e)}")
         raise
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'model_loaded': model_service.model is not None
-    })
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -73,11 +65,18 @@ def predict():
         input_data = request.json
         
         # Validate input data
-        if not input_data or not isinstance(input_data, list):
-            return jsonify({'error': 'Input must be a list of features'}), 400
+        if not input_data or 'tilt' not in input_data or 'accel' not in input_data:
+            return jsonify({'error': 'Input must contain tilt and accel arrays'}), 400
             
-        # Convert input to numpy array
-        features = np.array([input_data])
+        # Validate array lengths
+        tilt = input_data['tilt']
+        accel = input_data['accel']
+        
+        if len(tilt) != 11 or len(accel) != 9:  # Adjust these numbers based on your expected input dimensions
+            return jsonify({'error': 'Invalid input dimensions. Expected tilt(11) and accel(9)'}), 400
+        
+        # Prepare and scale features
+        features = model_service.prepare_features(tilt, accel)
         
         # Make prediction
         prediction_result = model_service.predict(features)
