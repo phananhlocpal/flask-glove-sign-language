@@ -8,6 +8,17 @@ app = Flask(__name__)
 
 tf.config.set_visible_devices([], 'GPU')
 
+model_service = ModelService()
+
+try:
+    # Update these paths to your model and scaler locations
+    model_service.load_model(
+        model_path='best_model.keras',
+        scaler_path='scaler.joblib'
+    )
+except Exception as e:
+    print(f"Error initializing model service: {str(e)}")
+    raise
 class ModelService:
     def __init__(self):
         self.model = None
@@ -77,16 +88,4 @@ def home():
     return jsonify({'message': 'Welcome to the model server!'})
 
 if __name__ == "__main__":
-    model_service = ModelService()
-
-    try:
-        # Update these paths to your model and scaler locations
-        model_service.load_model(
-            model_path='best_model.keras',
-            scaler_path='scaler.joblib'
-        )
-    except Exception as e:
-        print(f"Error initializing model service: {str(e)}")
-        raise
-
     app.run()
