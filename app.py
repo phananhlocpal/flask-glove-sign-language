@@ -4,9 +4,6 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 from flask import Flask, request, jsonify
 
-# Configure TensorFlow to use only the CPU
-# tf.config.set_visible_devices([], 'GPU')
-
 app = Flask(__name__)
 
 class ModelService:
@@ -43,13 +40,11 @@ class ModelService:
         return {
             'predicted_label': int(predicted_class)
         }
-    
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    # Initialize model service
-    model_service = ModelService()
+model_service = ModelService()
 
+@app.before_first_request
+def initialize_model():
     try:
         # Update these paths to your model and scaler locations
         model_service.load_model(
@@ -60,6 +55,8 @@ def predict():
         print(f"Error initializing model service: {str(e)}")
         raise
 
+@app.route('/predict', methods=['POST'])
+def predict():
     """Prediction endpoint"""
     try:
         # Get input data from request
