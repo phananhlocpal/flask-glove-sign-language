@@ -8,3 +8,6 @@ Werkzeug==2.2.2
 numpy
 tensorflow
 flask-cors
+scikit-learn
+joblib
+
