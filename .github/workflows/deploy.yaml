@@ -12,7 +12,7 @@ on:
   # which case the git-url must be set to the repository to build.
   workflow_call:
     secrets:
-      KOYEB_EXAMPLES_APPS_TOKEN: wn41t844okt8l8pklog9y0tuqm2jr3tc627fenf31y481annah0mu13rk7uqjruq
+      KOYEB_EXAMPLES_APPS_TOKEN: 
         required: true
     inputs:
       git-url:
