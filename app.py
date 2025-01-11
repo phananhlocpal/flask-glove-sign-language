@@ -6,6 +6,8 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+tf.config.set_visible_devices([], 'GPU')
+
 class ModelService:
     def __init__(self):
         self.model = None
