@@ -3,8 +3,10 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 import joblib
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 tf.config.set_visible_devices([], 'GPU')
 
@@ -54,6 +56,7 @@ try:
 except Exception as e:
     print(f"Error initializing model service: {str(e)}")
     raise
+
 @app.route('/predict', methods=['POST'])
 def predict():
     """Prediction endpoint"""
