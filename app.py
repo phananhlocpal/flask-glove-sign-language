@@ -55,34 +55,34 @@ except Exception as e:
     print(f"Error initializing model service: {str(e)}")
     raise
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    """Prediction endpoint"""
-    try:
-        # Get input data from request
-        input_data = request.json
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     """Prediction endpoint"""
+#     try:
+#         # Get input data from request
+#         input_data = request.json
         
-        # Validate input data
-        if not input_data or 'tilt' not in input_data or 'accel' not in input_data:
-            return jsonify({'error': 'Input must contain tilt and accel arrays'}), 400
+#         # Validate input data
+#         if not input_data or 'tilt' not in input_data or 'accel' not in input_data:
+#             return jsonify({'error': 'Input must contain tilt and accel arrays'}), 400
             
-        # Validate array lengths
-        tilt = input_data['tilt']
-        accel = input_data['accel']
+#         # Validate array lengths
+#         tilt = input_data['tilt']
+#         accel = input_data['accel']
         
-        if len(tilt) != 11 or len(accel) != 9:  # Adjust these numbers based on your expected input dimensions
-            return jsonify({'error': 'Invalid input dimensions. Expected tilt(11) and accel(9)'}), 400
+#         if len(tilt) != 11 or len(accel) != 9:  # Adjust these numbers based on your expected input dimensions
+#             return jsonify({'error': 'Invalid input dimensions. Expected tilt(11) and accel(9)'}), 400
         
-        # Prepare and scale features
-        features = model_service.prepare_features(tilt, accel)
+#         # Prepare and scale features
+#         features = model_service.prepare_features(tilt, accel)
         
-        # Make prediction
-        prediction_result = model_service.predict(features)
+#         # Make prediction
+#         prediction_result = model_service.predict(features)
         
-        return jsonify(prediction_result)
+#         return jsonify(prediction_result)
         
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 @app.route('/', methods=['GET'])
 def home():
